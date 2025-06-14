@@ -26,16 +26,24 @@ DISCORD_LOG_LEVEL = get_log_level_env("DISCORD_LOG_LEVEL", LOG_LEVEL)
 DISCORD_WEBHOOK = os.environ["DISCORD_WEBHOOK"]
 
 
-# Remove default Lambda handlers
-for handler in logging.root.handlers[:]:
-    logging.root.removeHandler(handler)
+def configure_logger(_name: str) -> logging.Logger:
+    """
+    Configure logging handlers and levels for the application.
+    Can be called from other modules to (re)initialize logging.
+    """
+    # Remove all handlers from root logger
+    for handler in logging.root.handlers[:]:
+        logging.root.removeHandler(handler)
 
-logger = logging.getLogger(__name__)
-handler = logging.StreamHandler(sys.stdout)
-handler.setFormatter(logging.Formatter('[%(levelname)s] [%(name)s.%(funcName)s:%(lineno)d] %(message)s'))
-logger.addHandler(handler)
-logger.setLevel(getattr(logging, LOG_LEVEL))
+    logger = logging.getLogger(_name)
+    
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setFormatter(logging.Formatter('[%(levelname)s] [%(name)s.%(funcName)s:%(lineno)d] %(message)s'))
+    logger.addHandler(handler)
 
-# Add DiscordHandler to logger
-discord_handler = DiscordHandler(DISCORD_WEBHOOK, DISCORD_LOG_LEVEL)
-logger.addHandler(discord_handler)
+    discord_handler = DiscordHandler(DISCORD_WEBHOOK, DISCORD_LOG_LEVEL)
+    logger.addHandler(discord_handler)
+
+    logger.setLevel(getattr(logging, LOG_LEVEL))
+
+    return logger

@@ -2,6 +2,8 @@ import logging
 import sys
 import requests
 
+
+
 class DiscordHandler(logging.Handler):
     def __init__(self, webhook_url, level):
         super().__init__(level)
@@ -38,7 +40,8 @@ class DiscordHandler(logging.Handler):
             requests.post(
                 self.webhook_url,
                 json=data,
+                timeout=5
             )
         except Exception as e:
-            print(f"Failed to send log to Discord: {e}", file=sys.stderr)
+            self.handleError(record)
 

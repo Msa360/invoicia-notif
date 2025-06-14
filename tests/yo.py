@@ -1,7 +1,6 @@
-import os
+import invoicia_notif
 
-
-from invoicia_notif import logger
+logger = invoicia_notif.configure_logger(__name__)
 
 def log():
     logger.debug("This is a debug message")
