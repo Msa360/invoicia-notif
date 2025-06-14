@@ -1,30 +1,39 @@
-import requests
-import os
+import sys, os
+import logging
 from dotenv import load_dotenv
 
+from invoicia_notif.discord import DiscordHandler
+
 load_dotenv()
-DISCORD_WEBHOOK = os.environ.get("DISCORD_WEBHOOK")
 
-def warning_discord(message: str, description: str = ""):
-    webhook_url = DISCORD_WEBHOOK
-    embed = {
-        "title": "⚠️ " + message,
-        "description": description,
-        "color": 0xFFA500
-    }
-    data = {
-        "embeds": [embed]
-    }
-    requests.post(webhook_url, json=data)
+def get_log_level_env(env_var: str, default: str = "INFO") -> str:
+    """it will raise ValueError if the log level is not valid"""
+    log_level = os.environ.get(env_var, default)
+    try:
+        logging._nameToLevel[log_level]
+    except KeyError:
+        raise ValueError(f"Invalid log level: {log_level} from {env_var}. Must be one of: {list(logging._nameToLevel.keys())}")
+    return log_level
 
-def error_discord(message: str, description: str = ""):
-    webhook_url = DISCORD_WEBHOOK
-    embed = {
-        "title": "❌ " + message,
-        "description": description,
-        "color": 0xFF0000
-    }
-    data = {
-        "embeds": [embed]
-    }
-    requests.post(webhook_url, json=data)
+
+LOG_LEVEL = get_log_level_env("LOG_LEVEL")
+
+DISCORD_LOG_LEVEL = get_log_level_env("DISCORD_LOG_LEVEL", LOG_LEVEL)
+
+DISCORD_WEBHOOK = os.environ["DISCORD_WEBHOOK"]
+
+
+# Remove default Lambda handlers
+for handler in logging.root.handlers[:]:
+    logging.root.removeHandler(handler)
+
+logger = logging.getLogger(__name__)
+handler = logging.StreamHandler(sys.stdout)
+handler.setFormatter(logging.Formatter('[%(levelname)s] [%(name)s.%(funcName)s:%(lineno)d] %(message)s'))
+logger.addHandler(handler)
+logger.setLevel(getattr(logging, LOG_LEVEL))
+
+# Add DiscordHandler to logger
+discord_handler = DiscordHandler(DISCORD_WEBHOOK, DISCORD_LOG_LEVEL)
+discord_handler.setFormatter(logging.Formatter('[%(levelname)s] %(message)s'))
+logger.addHandler(discord_handler)

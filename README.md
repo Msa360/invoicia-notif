@@ -1,0 +1,1 @@
+Invoicia internal library for notifications
