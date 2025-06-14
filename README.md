@@ -1,1 +1,1 @@
-Invoicia internal library for notifications
+Invoicia internal library for logs notifications to discord

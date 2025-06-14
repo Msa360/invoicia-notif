@@ -11,7 +11,7 @@ class DiscordHandler(logging.Handler):
         # Customize message based on log level
         if record.levelno >= logging.ERROR:
             embed = {
-                "title": "🚨 ERROR " + f"({record.filename}:{record.funcName}:{record.lineno})",
+                "title": "❌ ERROR " + f"({record.filename}:{record.funcName}:{record.lineno})",
                 "description": record.getMessage(),
                 "color": 0xFF0000
             }

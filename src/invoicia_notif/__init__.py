@@ -7,7 +7,10 @@ from invoicia_notif.discord import DiscordHandler
 load_dotenv()
 
 def get_log_level_env(env_var: str, default: str = "INFO") -> str:
-    """it will raise ValueError if the log level is not valid"""
+    """
+    Get the log level from an environment variable, with a default value.
+    It will raise ValueError if the log level is not valid.
+    """
     log_level = os.environ.get(env_var, default)
     try:
         logging._nameToLevel[log_level]
@@ -35,5 +38,4 @@ logger.setLevel(getattr(logging, LOG_LEVEL))
 
 # Add DiscordHandler to logger
 discord_handler = DiscordHandler(DISCORD_WEBHOOK, DISCORD_LOG_LEVEL)
-discord_handler.setFormatter(logging.Formatter('[%(levelname)s] %(message)s'))
 logger.addHandler(discord_handler)
